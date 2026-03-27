@@ -1,28 +1,29 @@
+from pydantic import BaseModel, EmailStr
+from typing import Optional
 
-# Import Pydantic BaseModel for schema definitions
-from pydantic import BaseModel
+class UserBase(BaseModel):
+    rol: str
+    nameUser: str
+    phoneUser: str
+    rfcUser: str
+    addressUser: str
+    email: EmailStr
+    userName: str
 
-# Schema for user creation
-class UserCreate(BaseModel):
-    """
-    Schema for creating a new user.
-    Attributes:
-        email (str): User's email.
-        password (str): User's password.
-    """
-    email: str
+class UserCreate(UserBase):
     password: str
+    
+class UserUpdate(BaseModel):
+    rol: Optional[str] = None
+    nameUser: Optional[str] = None
+    phoneUser: Optional[str] = None
+    rfcUser: Optional[str] = None
+    addressUser: Optional[str] = None
+    userName: Optional[str] = None
+    password: Optional[str] = None
 
-# Schema for user response
-class UserResponse(BaseModel):
-    """
-    Schema for returning user data in responses.
-    Attributes:
-        id (int): User's ID.
-        email (str): User's email.
-    """
-    id: int
-    email: str
+class UserResponse(UserBase):
+    userID: int
 
     class Config:
-        orm_mode = True  # Enable ORM mode for SQLAlchemy compatibility
+        from_attributes = True

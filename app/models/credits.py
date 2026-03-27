@@ -18,7 +18,7 @@ class Credits(Base):
 
     creditID     = Column(Integer, primary_key=True)
     clientID     = Column(Integer, ForeignKey("client.clientID"), nullable=False)
-    saleID       = Column(Integer, ForeignKey("sales.salesID"), nullable=False)
+    salesID       = Column(Integer, ForeignKey("sales.salesID"), nullable=False)
     totalAmount  = Column(Double(10, 4), nullable=False)
     balance      = Column(Double(10, 4), nullable=False)
     amountPaid   = Column(Double(10, 4), nullable=False)
@@ -38,7 +38,6 @@ class CreditPayments(Base):
         amount (float): Amount of the payment.
         paymentDate (datetime): Date and time of the payment.
         paymentMethod (str): Method of payment (e.g., 'cash', 'card').
-        notes (str): Optional notes about the payment.
     """
     __tablename__ = "credit_payments"
 

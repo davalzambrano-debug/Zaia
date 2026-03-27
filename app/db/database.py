@@ -7,6 +7,12 @@ from sqlalchemy.orm import sessionmaker, declarative_base
 # Get the database URL from environment variables
 DATABASE_URL = os.getenv("DATABASE_URL")
 
+def GetDB():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 # Create the SQLAlchemy engine
 engine = create_engine(DATABASE_URL)
 # Create a configured "Session" class

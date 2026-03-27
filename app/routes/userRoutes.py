@@ -1,58 +1,29 @@
-
-# Import FastAPI and dependencies for routing and authentication
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from app.db.database import SessionLocal
-from app.services import auth_service
-from app.core.security import create_token
+from app.services import product_service
+from app.schemas.productsSchema import ProductCreate, ProductResponse
 
-# Create an API router with prefix /auth
-router = APIRouter(prefix="/auth")
+router = APIRouter(prefix="/user", tags=["User"])
 
-# Dependency to get a database session
-def get_db():
-    """
-    Provides a database session for request lifecycle.
-    Yields:
-        Session: SQLAlchemy database session.
-    """
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+@router.get("/")
+def GetAll(db: Session = Depends(GetDB)):
+    return UserService(db).GetAll()
 
-# Register endpoint
-@router.post("/register")
-def register(email: str, password: str, db: Session = Depends(get_db)):
-    """
-    Registers a new user.
-    Args:
-        email (str): User's email.
-        password (str): User's password.
-        db (Session): Database session.
-    Returns:
-        User: The created user object.
-    """
-    return auth_service.register(db, email, password)
+@router.get("/{userID}")
+def GetByID(userID: int, db: Session = Depends(GetDB)):
+    return UserService(db).GetByID(userID)
 
-# Login endpoint
-@router.post("/login")
-def login(email: str, password: str, db: Session = Depends(get_db)):
-    """
-    Authenticates a user and returns a JWT token if successful.
-    Args:
-        email (str): User's email.
-        password (str): User's password.
-        db (Session): Database session.
-    Returns:
-        dict: Access token if authentication is successful.
-    Raises:
-        HTTPException: If credentials are invalid.
-    """
-    user = auth_service.login(db, email, password)
-    if not user:
-        raise HTTPException(status_code=401, detail="Invalid credentials")
+@router.post("/")
+def Create(data: UserCreate, db: Session = Depends(GetDB)):
+    return UserService(db).Create(data)
 
-    token = create_token({"sub": user.email})
-    return {"access_token": token}
+@router.put("/{userID}")
+def Update(userID: int, data: UserUpdate, db: Session = Depends(GetDB),
+           current_user=Depends(get_current_user)):
+    return UserService(db).Update(userID, data)
+
+@router.delete("/{userID}")
+def Delete(userID: int, db: Session = Depends(GetDB),
+           current_user=Depends(get_current_user)):
+    return UserService(db).Delete(userID)
