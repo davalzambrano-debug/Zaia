@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from db.database import GetDB
-from schemas.supplierSchema import SupplierCreate, SupplierUpdate
-from services.supplier_services import SupplierService
-from core.security import get_current_user
+from app.db.database import GetDB
+from app.schemas.supplierSchema import SupplierCreate, SupplierUpdate
+from app.services.supplierService import SupplierService
+from app.core.security import get_current_user
 
 router = APIRouter(prefix="/suppliers", tags=["Suppliers"])
 
@@ -21,10 +21,10 @@ def Create(data: SupplierCreate, db: Session = Depends(GetDB)):
 
 @router.put("/{supplierID}")
 def Update(supplierID: int, data: SupplierUpdate, db: Session = Depends(GetDB),
-           current_user=Depends(get_current_user)):
+           current_user=Depends(get_current_user)):  # JWT required
     return SupplierService(db).Update(supplierID, data)
 
 @router.delete("/{supplierID}")
 def Delete(supplierID: int, db: Session = Depends(GetDB),
-           current_user=Depends(get_current_user)):
+           current_user=Depends(get_current_user)):  # JWT required
     return SupplierService(db).Delete(supplierID)

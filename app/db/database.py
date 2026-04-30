@@ -1,21 +1,18 @@
-
-# Import required modules for database setup
 import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 
-# Get the database URL from environment variables
+# Database connection
 DATABASE_URL = os.getenv("DATABASE_URL")
 
+engine = create_engine(DATABASE_URL)
+SessionLocal = sessionmaker(bind=engine)
+Base = declarative_base()
+
 def GetDB():
+    # Open and close session per request
     db = SessionLocal()
     try:
         yield db
     finally:
         db.close()
-# Create the SQLAlchemy engine
-engine = create_engine(DATABASE_URL)
-# Create a configured "Session" class
-SessionLocal = sessionmaker(bind=engine)
-# Base class for declarative models
-Base = declarative_base()

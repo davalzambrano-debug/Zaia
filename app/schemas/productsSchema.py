@@ -7,7 +7,7 @@ class ProductBase(BaseModel):
     code: str
     nameProduct: str
     stock: int
-    type: str
+    category: str
 
 class ProductCreate(ProductBase):
     pass
@@ -18,10 +18,9 @@ class ProductUpdate(BaseModel):
     code: Optional[str] = None
     nameProduct: Optional[str] = None
     stock: Optional[int] = None
-    type: Optional[str] = None
+    category: Optional[str] = None
 
 class ProductResponse(ProductBase):
     productID: int
-
     class Config:
         from_attributes = True

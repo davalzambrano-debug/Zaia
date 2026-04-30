@@ -29,18 +29,15 @@ class CreditsUpdate(BaseModel):
 
 class CreditsResponse(CreditsBase):
     creditID: int
-
     class Config:
         from_attributes = True
-
-# CreditPayments schemas
 
 class CreditPaymentsBase(BaseModel):
     creditID: int
     amount: float
-    paymentDate: float
+    paymentDate: date
     paymentMethod: str
-    notes: str
+    notes: Optional[str] = None
 
 class CreditPaymentsCreate(CreditPaymentsBase):
     pass
@@ -48,12 +45,11 @@ class CreditPaymentsCreate(CreditPaymentsBase):
 class CreditPaymentsUpdate(BaseModel):
     creditID: Optional[int] = None
     amount: Optional[float] = None
-    paymentDate: Optional[float] = None
+    paymentDate: Optional[date] = None
     paymentMethod: Optional[str] = None
     notes: Optional[str] = None
 
 class CreditPaymentsResponse(CreditPaymentsBase):
     paymentID: int
-
     class Config:
         from_attributes = True

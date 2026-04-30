@@ -1,73 +1,74 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from datetime import date
-from db.database import GetDB
-from schemas.salesSchema import SalesCreate, SalesUpdate
-from services.sales_services import SalesService
-from core.security import get_current_user
+from app.db.database import GetDB
+from app.schemas.salesSchema import SalesCreate, SalesUpdate, SalesDetailsCreate, SalesDetailsUpdate
+from app.services.salesService import SalesService, SalesDetailsService
+from app.core.security import get_current_user
 
 router = APIRouter(prefix="/sales", tags=["Sales"])
 
 @router.get("/")
-def get_all(db: Session = Depends(GetDB)):
-    return SalesService(db).get_all()
+def GetAll(db: Session = Depends(GetDB)):
+    return SalesService(db).GetAll()
+
+# Specific routes before /{salesID} to avoid routing conflicts
+@router.get("/filter/date-range")
+def GetByDateRange(start: date, end: date, db: Session = Depends(GetDB)):
+    return SalesService(db).GetByDateRange(start, end)
+
+@router.get("/user/{userID}")
+def GetByUser(userID: int, db: Session = Depends(GetDB)):
+    return SalesService(db).GetByUser(userID)
+
+@router.get("/client/{clientID}")
+def GetByClient(clientID: int, db: Session = Depends(GetDB)):
+    return SalesService(db).GetByClient(clientID)
 
 @router.get("/{salesID}")
-def get_by_id(salesID: int, db: Session = Depends(GetDB)):
-    return SalesService(db).get_by_id(salesID)
-
-@router.get("/user/{user_id}")
-def get_by_user(user_id: int, db: Session = Depends(GetDB)):
-    return SalesService(db).get_by_user(user_id)
-
-@router.get("/client/{client_id}")
-def get_by_client(client_id: int, db: Session = Depends(GetDB)):
-    return SalesService(db).get_by_client(client_id)
-
-@router.get("/filter/date-range")
-def get_by_date_range(start: date, end: date, db: Session = Depends(GetDB)):
-    return SalesService(db).get_by_date_range(start, end)
+def GetByID(salesID: int, db: Session = Depends(GetDB)):
+    return SalesService(db).GetByID(salesID)
 
 @router.post("/")
-def create(data: SalesCreate, db: Session = Depends(GetDB)):
-    return SalesService(db).create(data)
+def Create(data: SalesCreate, db: Session = Depends(GetDB)):
+    return SalesService(db).Create(data)
 
 @router.put("/{salesID}")
-def update(salesID: int, data: SalesUpdate, db: Session = Depends(GetDB),
-           current_user=Depends(get_current_user)):
-    return SalesService(db).update(salesID, data)
+def Update(salesID: int, data: SalesUpdate, db: Session = Depends(GetDB),
+           current_user=Depends(get_current_user)):  # JWT required
+    return SalesService(db).Update(salesID, data)
 
 @router.delete("/{salesID}")
-def delete(salesID: int, db: Session = Depends(GetDB),
-           current_user=Depends(get_current_user)):
-    return SalesService(db).delete(salesID)
+def Delete(salesID: int, db: Session = Depends(GetDB),
+           current_user=Depends(get_current_user)):  # JWT required
+    return SalesService(db).Delete(salesID)
 
 
-# Sales Details
+# Sales details router registered separately in main.py
 routerSalesDetails = APIRouter(prefix="/sales-details", tags=["Sales Details"])
 
-@router.get("/")
-def GetAllSalesDetails(db: Session = Depends(GetDB)):
-    return SalesDetailsService(db).GetAllSalesDetails()
+@routerSalesDetails.get("/")
+def GetAllDetails(db: Session = Depends(GetDB)):
+    return SalesDetailsService(db).GetAll()
 
-@router.get("/{detail_id}")
-def GetByIDSalesDetails(detail_id: int, db: Session = Depends(GetDB)):
-    return SalesDetailsService(db).GetByIDSalesDetails(detail_id)
+@routerSalesDetails.get("/product/{productID}")
+def GetByProduct(productID: int, db: Session = Depends(GetDB)):
+    return SalesDetailsService(db).GetByProduct(productID)
 
-@router.get("/product/{product_id}")
-def GetByProductSalesDetails(product_id: int, db: Session = Depends(GetDB)):
-    return SalesDetailsService(db).GetByProductSalesDetails(product_id)
+@routerSalesDetails.get("/{salesDetailsID}")
+def GetDetailByID(salesDetailsID: int, db: Session = Depends(GetDB)):
+    return SalesDetailsService(db).GetByID(salesDetailsID)
 
-@router.post("/")
-def CreateSalesDetails(data: SalesDetailsCreate, db: Session = Depends(GetDB)):
-    return SalesDetailsService(db).CreateSalesDetails(data)
+@routerSalesDetails.post("/")
+def CreateDetail(data: SalesDetailsCreate, db: Session = Depends(GetDB)):
+    return SalesDetailsService(db).Create(data)
 
-@router.put("/{detail_id}")
-def UpdateSalesDetails(detail_id: int, data: SalesDetailsUpdate, db: Session = Depends(GetDB),
-                       current_user=Depends(get_current_user)):
-    return SalesDetailsService(db).UpdateSalesDetails(detail_id, data)
+@routerSalesDetails.put("/{salesDetailsID}")
+def UpdateDetail(salesDetailsID: int, data: SalesDetailsUpdate, db: Session = Depends(GetDB),
+                 current_user=Depends(get_current_user)):  # JWT required
+    return SalesDetailsService(db).Update(salesDetailsID, data)
 
-@router.delete("/{detail_id}")
-def DeleteSalesDetails(detail_id: int, db: Session = Depends(GetDB),
-                       current_user=Depends(get_current_user)):
-    return SalesDetailsService(db).DeleteSalesDetails(detail_id)
+@routerSalesDetails.delete("/{salesDetailsID}")
+def DeleteDetail(salesDetailsID: int, db: Session = Depends(GetDB),
+                 current_user=Depends(get_current_user)):  # JWT required
+    return SalesDetailsService(db).Delete(salesDetailsID)

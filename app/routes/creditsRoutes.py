@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from datetime import date
-from db.database import GetDB
-from schemas.creditsSchema import CreditsCreate, CreditsUpdate
-from services.credits_services import CreditsService
-from core.security import get_current_user
+from app.db.database import GetDB
+from app.schemas.creditsSchema import CreditsCreate, CreditsUpdate, CreditPaymentsCreate, CreditPaymentsUpdate
+from app.services.creditsService import CreditsService, CreditPaymentsService
+from app.core.security import get_current_user
 
 router = APIRouter(prefix="/credits", tags=["Credits"])
 
@@ -12,14 +12,7 @@ router = APIRouter(prefix="/credits", tags=["Credits"])
 def GetAll(db: Session = Depends(GetDB)):
     return CreditsService(db).GetAll()
 
-@router.get("/{credit_id}")
-def GetById(credit_id: int, db: Session = Depends(GetDB)):
-    return CreditsService(db).GetById(credit_id)
-
-@router.get("/client/{clientID}")
-def GetByClient(clientID: int, db: Session = Depends(GetDB)):
-    return CreditsService(db).GetByClient(clientID)
-
+# Specific routes before /{creditID} to avoid routing conflicts
 @router.get("/filter/status")
 def GetByStatus(status: str, db: Session = Depends(GetDB)):
     return CreditsService(db).GetByStatus(status)
@@ -28,47 +21,54 @@ def GetByStatus(status: str, db: Session = Depends(GetDB)):
 def GetOverdue(current_date: date, db: Session = Depends(GetDB)):
     return CreditsService(db).GetOverdue(current_date)
 
+@router.get("/client/{clientID}")
+def GetByClient(clientID: int, db: Session = Depends(GetDB)):
+    return CreditsService(db).GetByClient(clientID)
+
+@router.get("/{creditID}")
+def GetByID(creditID: int, db: Session = Depends(GetDB)):
+    return CreditsService(db).GetByID(creditID)
+
 @router.post("/")
 def Create(data: CreditsCreate, db: Session = Depends(GetDB)):
     return CreditsService(db).Create(data)
 
-@router.put("/{credit_id}")
-def Update(credit_id: int, data: CreditsUpdate, db: Session = Depends(GetDB),
-           current_user=Depends(get_current_user)):
-    return CreditsService(db).Update(credit_id, data)
+@router.put("/{creditID}")
+def Update(creditID: int, data: CreditsUpdate, db: Session = Depends(GetDB),
+           current_user=Depends(get_current_user)):  # JWT required
+    return CreditsService(db).Update(creditID, data)
 
-@router.delete("/{credit_id}")
-def Delete(credit_id: int, db: Session = Depends(GetDB),
-           current_user=Depends(get_current_user)):
-    return CreditsService(db).Delete(credit_id)
+@router.delete("/{creditID}")
+def Delete(creditID: int, db: Session = Depends(GetDB),
+           current_user=Depends(get_current_user)):  # JWT required
+    return CreditsService(db).Delete(creditID)
 
 
-# Credit Payments
+# Credit payments router registered separately in main.py
 routerCreditPayments = APIRouter(prefix="/credit-payments", tags=["Credit Payments"])
 
 @routerCreditPayments.get("/")
-def GetAllCreditPayments(db: Session = Depends(GetDB)):
-    return CreditsService(db).GetAllCreditPayments()
+def GetAllPayments(db: Session = Depends(GetDB)):
+    return CreditPaymentsService(db).GetAll()
 
-@routerCreditPayments.get("/{payment_id}")
-def GetById(payment_id: int, db: Session = Depends(GetDB)):
-    return CreditsService(db).GetCreditPaymentById(payment_id)
+@routerCreditPayments.get("/credit/{creditID}")
+def GetByCredit(creditID: int, db: Session = Depends(GetDB)):
+    return CreditPaymentsService(db).GetByCredit(creditID)
 
-@routerCreditPayments.get("/credit/{credit_id}")
-def GetByCredit(credit_id: int, db: Session = Depends(GetDB)):
-    return CreditsService(db).GetCreditPaymentsByCredit(credit_id)
+@routerCreditPayments.get("/{paymentID}")
+def GetPaymentByID(paymentID: int, db: Session = Depends(GetDB)):
+    return CreditPaymentsService(db).GetByID(paymentID)
 
 @routerCreditPayments.post("/")
-def CreateCreditPayment(data: CreditPaymentCreate, db: Session = Depends(GetDB)):
-    return CreditsService(db).CreateCreditPayment(data)
+def CreatePayment(data: CreditPaymentsCreate, db: Session = Depends(GetDB)):
+    return CreditPaymentsService(db).Create(data)
 
-@routerCreditPayments.put("/{payment_id}")
-def UpdateCreditPayment(payment_id: int, data: CreditPaymentUpdate, db: Session = Depends(GetDB),
-                        current_user=Depends(get_current_user)):
-    return CreditsService(db).UpdateCreditPayment(payment_id, data)
+@routerCreditPayments.put("/{paymentID}")
+def UpdatePayment(paymentID: int, data: CreditPaymentsUpdate, db: Session = Depends(GetDB),
+                  current_user=Depends(get_current_user)):  # JWT required
+    return CreditPaymentsService(db).Update(paymentID, data)
 
-@routerCreditPayments.delete("/{payment_id}")
-def DeleteCreditPayment(payment_id: int, db: Session = Depends(GetDB),
-                        current_user=Depends(get_current_user)):
-    return CreditsService(db).DeleteCreditPayment(payment_id)
-
+@routerCreditPayments.delete("/{paymentID}")
+def DeletePayment(paymentID: int, db: Session = Depends(GetDB),
+                  current_user=Depends(get_current_user)):  # JWT required
+    return CreditPaymentsService(db).Delete(paymentID)

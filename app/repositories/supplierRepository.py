@@ -5,32 +5,24 @@ class SupplierRepository:
     def __init__(self, db: Session):
         self.db = db
 
-    # Get supplier by ID
-    def GetSupplierByID(self, supplierID: int):
+    def GetAll(self):
+        return self.db.query(Supplier).all()
+
+    def GetByID(self, supplierID: int):
         return self.db.query(Supplier).filter(Supplier.supplierID == supplierID).first()
 
-    # Create a new supplier
-    def CreateSupplier(self, contactTittle: str, nameSupplier: str, emailSupplier: str, rfcSupplier: str, phoneSupplier: str, addressSupplier: str):
-        supplier = Supplier(
-            contactTittle=contactTittle,
-            nameSupplier=nameSupplier,
-            emailSupplier=emailSupplier,
-            rfcSupplier=rfcSupplier,
-            phoneSupplier=phoneSupplier,
-            addressSupplier=addressSupplier
-        )
+    def GetByEmail(self, email: str):
+        # Check for duplicate email
+        return self.db.query(Supplier).filter(Supplier.emailSupplier == email).first()
+
+    def Create(self, supplier: Supplier):
         self.db.add(supplier)
         self.db.commit()
         self.db.refresh(supplier)
         return supplier
 
-    # Get all suppliers
-    def GetSuppliers(self):
-        return self.db.query(Supplier).all()
-
-    # Update supplier
-    def UpdateSupplier(self, supplierID: int, data: dict):
-        supplier = self.GetSupplierByID(supplierID)
+    def Update(self, supplierID: int, data: dict):
+        supplier = self.GetByID(supplierID)
         if supplier:
             for key, value in data.items():
                 setattr(supplier, key, value)
@@ -38,11 +30,9 @@ class SupplierRepository:
             self.db.refresh(supplier)
         return supplier
 
-    # Delete supplier
-    def DeleteSupplier(self, supplierID: int):
-        supplier = self.GetSupplierByID(supplierID)
+    def Delete(self, supplierID: int):
+        supplier = self.GetByID(supplierID)
         if supplier:
             self.db.delete(supplier)
             self.db.commit()
         return supplier
-

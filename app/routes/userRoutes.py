@@ -1,8 +1,9 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from app.db.database import SessionLocal
-from app.services import product_service
-from app.schemas.productsSchema import ProductCreate, ProductResponse
+from app.db.database import GetDB
+from app.services.userService import UserService
+from app.schemas.userSchema import UserCreate, UserUpdate
+from app.core.security import get_current_user
 
 router = APIRouter(prefix="/user", tags=["User"])
 
@@ -20,10 +21,10 @@ def Create(data: UserCreate, db: Session = Depends(GetDB)):
 
 @router.put("/{userID}")
 def Update(userID: int, data: UserUpdate, db: Session = Depends(GetDB),
-           current_user=Depends(get_current_user)):
+           current_user=Depends(get_current_user)):  # JWT required
     return UserService(db).Update(userID, data)
 
 @router.delete("/{userID}")
 def Delete(userID: int, db: Session = Depends(GetDB),
-           current_user=Depends(get_current_user)):
+           current_user=Depends(get_current_user)):  # JWT required
     return UserService(db).Delete(userID)
