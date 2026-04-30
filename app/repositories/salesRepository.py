@@ -5,35 +5,36 @@ class SalesRepository:
     def __init__(self, db: Session):
         self.db = db
 
-    # Create new sale
-    def CreateSale(self, sale: Sales):
+    def GetAll(self):
+        return self.db.query(Sales).all()
+
+    def GetByID(self, salesID: int):
+        return self.db.query(Sales).filter(Sales.salesID == salesID).first()
+
+    def GetByUser(self, userID: int):
+        return self.db.query(Sales).filter(Sales.userID == userID).all()
+
+    def GetByClient(self, clientID: int):
+        return self.db.query(Sales).filter(Sales.clientID == clientID).all()
+
+    def GetByType(self, typeSale: str):
+        return self.db.query(Sales).filter(Sales.typeSale == typeSale).all()
+
+    def GetByDateRange(self, startDate, endDate):
+        # Filter sales between two dates
+        return self.db.query(Sales).filter(
+            Sales.dateSale >= startDate,
+            Sales.dateSale <= endDate
+        ).all()
+
+    def Create(self, sale: Sales):
         self.db.add(sale)
         self.db.commit()
         self.db.refresh(sale)
         return sale
 
-    # Get all sales
-    def GetSales(self):
-        return self.db.query(Sales).all()
-    # Get sale by ID
-    def GetSaleByID(self, saleID: int):
-        return self.db.query(Sales).filter(Sales.saleID == saleID).first()
-    # Get sales by user ID
-    def GetSalesByUserID(self, userID: int):
-        return self.db.query(Sales).filter(Sales.userID == userID).all()
-    # Get sales by client
-    def GetSalesByClientID(self, clientID: int):
-        return self.db.query(Sales).filter(Sales.clientID == clientID).all()
-    # Get sales by type
-    def GetSalesByType(self, saleType: str):
-        return self.db.query(Sales).filter(Sales.saleType == saleType).all()
-    # Get sales by date range
-    def GetSalesByDateRange(self, startDate: str, endDate: str):
-        return self.db.query(Sales).filter(Sales.saleDate >= startDate, Sales.saleDate <= endDate).all()
-
-    # Update sale
-    def UpdateSale(self, saleID: int, data: dict):
-        sale = self.GetSaleByID(saleID)
+    def Update(self, salesID: int, data: dict):
+        sale = self.GetByID(salesID)
         if sale:
             for key, value in data.items():
                 setattr(sale, key, value)
@@ -41,49 +42,45 @@ class SalesRepository:
             self.db.refresh(sale)
         return sale
 
-    # Delete sale
-    def DeleteSale(self, saleID: int):
-        sale = self.GetSaleByID(saleID)
+    def Delete(self, salesID: int):
+        sale = self.GetByID(salesID)
         if sale:
             self.db.delete(sale)
             self.db.commit()
         return sale
 
+
 class SalesDetailsRepository:
     def __init__(self, db: Session):
         self.db = db
 
-    # Create new sale detail
-    def CreateSaleDetail(self, saleDetail: SalesDetails):
-        self.db.add(saleDetail)
-        self.db.commit()
-        self.db.refresh(saleDetail)
-        return saleDetail
-
-    # Get all sale details
-    def GetSaleDetails(self):
+    def GetAll(self):
         return self.db.query(SalesDetails).all()
-    # Get sale details by sale ID
-    def GetSaleDetailsBySaleID(self, saleID: int):
-        return self.db.query(SalesDetails).filter(SalesDetails.saleID == saleID).all()
-    # Get sale details by product ID
-    def GetSaleDetailsByProductID(self, productID: int):
-        return self.db.query(SalesDetails).filter(SalesDetails.productID == productID).all()
-    
-    # Update sale detail
-    def UpdateSaleDetail(self, saleDetailID: int, data: dict):
-        saleDetail = self.db.query(SalesDetails).filter(SalesDetails.saleDetailID == saleDetailID).first()
-        if saleDetail:
-            for key, value in data.items():
-                setattr(saleDetail, key, value)
-            self.db.commit()
-            self.db.refresh(saleDetail)
-        return saleDetail
 
-    # Delete sale detail
-    def DeleteSaleDetail(self, saleDetailID: int):
-        saleDetail = self.db.query(SalesDetails).filter(SalesDetails.saleDetailID == saleDetailID).first()
-        if saleDetail:
-            self.db.delete(saleDetail)
+    def GetByID(self, salesDetailsID: int):
+        return self.db.query(SalesDetails).filter(SalesDetails.salesDetailsID == salesDetailsID).first()
+
+    def GetByProduct(self, productID: int):
+        return self.db.query(SalesDetails).filter(SalesDetails.productID == productID).all()
+
+    def Create(self, detail: SalesDetails):
+        self.db.add(detail)
+        self.db.commit()
+        self.db.refresh(detail)
+        return detail
+
+    def Update(self, salesDetailsID: int, data: dict):
+        detail = self.GetByID(salesDetailsID)
+        if detail:
+            for key, value in data.items():
+                setattr(detail, key, value)
             self.db.commit()
-        return saleDetail
+            self.db.refresh(detail)
+        return detail
+
+    def Delete(self, salesDetailsID: int):
+        detail = self.GetByID(salesDetailsID)
+        if detail:
+            self.db.delete(detail)
+            self.db.commit()
+        return detail

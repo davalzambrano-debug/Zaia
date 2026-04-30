@@ -1,44 +1,46 @@
 from sqlalchemy.orm import Session
 from app.models.user import User
 
+class UserRepository:
+    def __init__(self, db: Session):
+        self.db = db
 
-# Get user by email
-def GetUserByEmail(db: Session, email: str):
-    return db.query(User).filter(User.email == email).first()
+    def GetAll(self):
+        return self.db.query(User).all()
 
+    def GetByID(self, userID: int):
+        return self.db.query(User).filter(User.userID == userID).first()
 
-# Create a new user
-def CreateUser(db: Session, email: str, password: str):
-    user = User(email=email, password=password)
-    db.add(user)
-    db.commit()
-    db.refresh(user)
-    return user
+    def GetByEmail(self, email: str):
+        return self.db.query(User).filter(User.email == email).first()
 
+    def get_by_id(self, userID: int):
+        # Alias used by security.py
+        return self.GetByID(userID)
 
-# Get all users
-def GetUsers(db: Session):
-    return db.query(User).all()
+    def get_by_username(self, username: str):
+        # Used on login
+        return self.db.query(User).filter(User.userName == username).first()
 
-# Get user by ID
-def GetUserByID(db: Session, userID: int):
-    return db.query(User).filter(User.id == userID).first()
+    def Create(self, user: User):
+        # Save new user
+        self.db.add(user)
+        self.db.commit()
+        self.db.refresh(user)
+        return user
 
-# Update user information
-def UpdateUser(db: Session, userID: int, password: str = None):
-    user = GetUserByID(db, userID)
-    if not user:
-        return None
-    elif password:
-        user.password = password
-    db.commit()
-    db.refresh(user)
-    return user
+    def Update(self, userID: int, data: dict):
+        user = self.GetByID(userID)
+        if user:
+            for key, value in data.items():
+                setattr(user, key, value)
+            self.db.commit()
+            self.db.refresh(user)
+        return user
 
-# Delete user
-def DeleteUser(db: Session, userID: int):
-    user = GetUserByID(db, userID)
-    if user:
-        db.delete(user)
-        db.commit()
-    return user
+    def Delete(self, userID: int):
+        user = self.GetByID(userID)
+        if user:
+            self.db.delete(user)
+            self.db.commit()
+        return user

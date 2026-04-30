@@ -5,25 +5,20 @@ class StoreRepository:
     def __init__(self, db: Session):
         self.db = db
 
-    # Create Store
-    def CreateStore(self, nameStore: str, addressStore: str, phoneStore: str):
-        store = Store(nameStore=nameStore, addressStore=addressStore, phoneStore=phoneStore)
+    def GetAll(self):
+        return self.db.query(Store).all()
+
+    def GetByID(self, storeID: int):
+        return self.db.query(Store).filter(Store.storeID == storeID).first()
+
+    def Create(self, store: Store):
         self.db.add(store)
         self.db.commit()
         self.db.refresh(store)
         return store
 
-    # Get all Stores
-    def GetStores(self):
-        return self.db.query(Store).all()
-    
-    # Get Store by ID
-    def GetStoreByID(self, storeID: int):
-        return self.db.query(Store).filter(Store.storeID == storeID).first()
-
-    # Update Store
-    def UpdateStore(self, storeID: int, data: dict):
-        store = self.GetStoreByID(storeID)
+    def Update(self, storeID: int, data: dict):
+        store = self.GetByID(storeID)
         if store:
             for key, value in data.items():
                 setattr(store, key, value)
@@ -31,9 +26,8 @@ class StoreRepository:
             self.db.refresh(store)
         return store
 
-    # Delete Store
-    def DeleteStore(self, storeID: int):
-        store = self.GetStoreByID(storeID)
+    def Delete(self, storeID: int):
+        store = self.GetByID(storeID)
         if store:
             self.db.delete(store)
             self.db.commit()
